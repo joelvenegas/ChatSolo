@@ -145,9 +145,16 @@
     chatForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       sendBtn.disabled = true;
-      await enviarMensaje();
-      sendBtn.disabled = false;
-      messageInput.focus();
+      
+      try {
+        await enviarMensaje();
+      } catch (err) {
+        console.error("Error en submit:", err);
+        alert(`Error: ${err.message}`);
+      } finally {
+        sendBtn.disabled = false;
+        messageInput.focus();
+      }
     });
 
     escucharMensajes();

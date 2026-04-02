@@ -1,6 +1,8 @@
-import { db, auth } from "./firebase.js";
+import { db, auth, storage } from "./firebase.js";
 import { collection, addDoc, onSnapshot, query, orderBy } 
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { ref, uploadBytes, getDownloadURL } 
+from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const messageContainer = document.getElementById("mensajes");
 
@@ -10,9 +12,19 @@ export async function enviarMensaje() {
 
   const texto = input.value.trim();
 
-  if (!texto) return;
+  if (!texto) {
+    console.log("Texto vacío, no se envía");
+    return;
+  }
 
   try {
+    // Validar que hay usuario autenticado
+    if (!auth.currentUser) {
+      throw new Error("No hay usuario autenticado");
+    }
+
+    console.log("Enviando mensaje:", { texto, user: auth.currentUser.email });
+
     await addDoc(collection(db, "mensajes"), {
       texto,
       user: auth.currentUser.email,
@@ -20,10 +32,12 @@ export async function enviarMensaje() {
       type: "text"
     });
 
+    console.log("Mensaje guardado exitosamente");
     input.value = "";
     input.focus();
   } catch (err) {
     console.error("Error al enviar mensaje:", err);
+    alert(`Error al enviar: ${err.message}`);
   }
 }
 
@@ -38,121 +52,54 @@ export async function enviarImagen(file) {
     throw new Error("El archivo debe ser una imagen (JPG, PNG, GIF, etc)");
   }
 
-  // Comprimir imagen si es muy grande
-  let fileToUse = file;
-  const maxSize = 1 * 1024 * 1024;
-  
+  // Limitar tamaño a 50MB
+  const maxSize = 50 * 1024 * 1024;
   if (file.size > maxSize) {
-    try {
-      fileToUse = await comprimirImagen(file);
-      if (fileToUse.size > maxSize) {
-        throw new Error(`La imagen es muy grande (${(file.size / 1024 / 1024).toFixed(2)}MB). Máximo 1MB`);
-      }
-    } catch (err) {
-      throw new Error(`Error al comprimir: ${err.message}`);
-    }
+    throw new Error(`La imagen es muy grande (${(file.size / 1024 / 1024).toFixed(2)}MB). Máximo 50MB`);
   }
 
-  return new Promise((resolve, reject) => {
-    try {
-      const reader = new FileReader();
+  try {
+    console.log("Iniciando subida de imagen:", file.name);
+    
+    // Crear referencia única para la imagen
+    const timestamp = Date.now();
+    const fileName = `${auth.currentUser.uid}_${timestamp}_${file.name}`;
+    const storageRef = ref(storage, `imagenes/${fileName}`);
 
-      reader.onload = async () => {
-        try {
-          // Validar que se haya leído correctamente
-          if (!reader.result) {
-            throw new Error("No se pudo leer la imagen");
-          }
+    console.log("Subiendo archivo a:", fileName);
+    // Subir archivo
+    await uploadBytes(storageRef, file);
 
-          const base64Image = reader.result;
+    console.log("Archivo subido, obteniendo URL...");
+    // Obtener URL descargable
+    const imageUrl = await getDownloadURL(storageRef);
 
-          // Validar que el base64 no esté vacío
-          if (base64Image.length < 100) {
-            throw new Error("La imagen está vacía o es muy pequeña");
-          }
-
-          // Guardar mensaje con imagen en base64
-          await addDoc(collection(db, "mensajes"), {
-            texto: "",
-            imageData: base64Image,
-            user: auth.currentUser.email,
-            timestamp: Date.now(),
-            type: "image"
-          });
-
-          resolve();
-        } catch (err) {
-          reject(err);
-        }
-      };
-
-      reader.onerror = (error) => {
-        console.error("FileReader error:", error);
-        reject(new Error(`Error al leer el archivo: ${error.type || "Desconocido"}`));
-      };
-
-      reader.onabort = () => {
-        reject(new Error("La lectura del archivo fue cancelada"));
-      };
-
-      // Leer el archivo como data URL
-      reader.readAsDataURL(fileToUse);
-    } catch (error) {
-      reject(new Error(`Error al procesar la imagen: ${error.message}`));
+    console.log("URL obtenida, guardando en Firestore...");
+    // Guardar mensaje con URL de imagen
+    await addDoc(collection(db, "mensajes"), {
+      texto: "",
+      imageUrl: imageUrl,
+      user: auth.currentUser.email,
+      timestamp: Date.now(),
+      type: "image"
+    });
+    
+    console.log("Imagen guardada exitosamente");
+  } catch (err) {
+    console.error("Error al subir imagen:", err);
+    // Mensajes de error más específicos
+    if (err.code === "storage/unauthorized") {
+      throw new Error("No tienes permiso para subir imágenes. Verifica las reglas de Storage en Firebase");
+    } else if (err.code === "storage/object-not-found") {
+      throw new Error("Error: Bucket de storage no encontrado");
+    } else if (err.code === "storage/bucket-not-found") {
+      throw new Error("Error: Storage no está configurado correctamente");
+    } else if (err.message?.includes("Failed to fetch")) {
+      throw new Error("Error de conexión. Verifica tu internet");
+    } else {
+      throw new Error(`Error al subir: ${err.message || err.code || "Error desconocido"}`);
     }
-  });
-}
-
-// Función auxiliar para comprimir imágenes
-function comprimirImagen(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = (event) => {
-      const img = new Image();
-
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        let width = img.width;
-        let height = img.height;
-
-        // Reducir tamaño si es muy grande
-        const maxDimension = 1024;
-        if (width > maxDimension || height > maxDimension) {
-          const ratio = Math.min(maxDimension / width, maxDimension / height);
-          width = Math.round(width * ratio);
-          height = Math.round(height * ratio);
-        }
-
-        canvas.width = width;
-        canvas.height = height;
-
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-
-        // Convertir canvas a blob con compresión
-        canvas.toBlob(
-          (blob) => {
-            resolve(blob);
-          },
-          "image/jpeg",
-          0.7 // Calidad: 70%
-        );
-      };
-
-      img.onerror = () => {
-        reject(new Error("No se pudo procesar la imagen"));
-      };
-
-      img.src = event.target.result;
-    };
-
-    reader.onerror = () => {
-      reject(new Error("Error al leer el archivo"));
-    };
-
-    reader.readAsDataURL(file);
-  });
+  }
 }
 
 export function escucharMensajes() {
@@ -163,10 +110,13 @@ export function escucharMensajes() {
   onSnapshot(
     q,
     (snapshot) => {
+      console.log("Listener activado, documentos:", snapshot.size);
       messageContainer.innerHTML = "";
 
       snapshot.forEach((doc) => {
         const data = doc.data();
+        console.log("Procesando mensaje:", data);
+        
         const div = document.createElement("div");
         div.classList.add("message");
 
@@ -184,12 +134,17 @@ export function escucharMensajes() {
         }
 
         // Mostrar contenido según tipo
-        if (data.type === "image" && data.imageData) {
-          div.innerHTML = `<img src="${data.imageData}" class="message-image" alt="Imagen compartida" loading="lazy"><small style="opacity: 0.7; font-size: 0.75em; display: block; margin-top: 0.5rem;">${timeString}</small>`;
+        if (data.type === "image" && data.imageUrl) {
+          div.innerHTML = `<img src="${data.imageUrl}" class="message-image" alt="Imagen compartida" loading="lazy"><small style="opacity: 0.7; font-size: 0.75em; display: block; margin-top: 0.5rem;">${timeString}</small>`;
         } else if (data.texto) {
           div.innerHTML = `<div>${escapeHtml(data.texto)}</div><small style="opacity: 0.7; font-size: 0.75em;">${timeString}</small>`;
+        } else {
+          // No mostrar si no tiene contenido
+          console.log("Saltando mensaje sin contenido");
+          return;
         }
 
+        console.log("Agregando div al contenedor");
         messageContainer.appendChild(div);
       });
 
