@@ -43,6 +43,47 @@
     const logoutBtn = document.getElementById("logoutBtn");
     const chatForm = document.getElementById("chatForm");
     const sendBtn = document.getElementById("sendBtn");
+    const chatContainer = document.querySelector(".chat-container");
+    const messageContainer = document.getElementById("mensajes");
+    const messageInput = document.getElementById("mensaje");
+
+    // Manejo del teclado virtual en móviles
+    function adjustViewportHeight() {
+      const viewportHeight = window.visualViewport?.height || window.innerHeight;
+      if (chatContainer) {
+        chatContainer.style.height = viewportHeight + "px";
+      }
+    }
+
+    // Event listeners para cambios de viewport
+    window.addEventListener("resize", adjustViewportHeight);
+    window.addEventListener("orientationchange", () => {
+      setTimeout(adjustViewportHeight, 100);
+    });
+
+    // Manejar cuando el input recibe focus
+    messageInput.addEventListener("focus", () => {
+      setTimeout(() => {
+        messageInput.scrollIntoView({ behavior: "smooth", block: "end" });
+        adjustViewportHeight();
+      }, 300);
+    });
+
+    // Manejar cuando el input pierde focus
+    messageInput.addEventListener("blur", () => {
+      setTimeout(adjustViewportHeight, 100);
+    });
+
+    // Scroll automático al último mensaje cuando se reciben nuevos
+    const originalEscucharMensajes = escucharMensajes;
+    escucharMensajes = function() {
+      originalEscucharMensajes();
+      setTimeout(() => {
+        if (messageContainer) {
+          messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+      }, 100);
+    };
 
     logoutBtn.addEventListener("click", async () => {
       logoutBtn.disabled = true;
@@ -54,10 +95,19 @@
       sendBtn.disabled = true;
       await enviarMensaje();
       sendBtn.disabled = false;
-      document.getElementById("mensaje").focus();
+      messageInput.focus();
+      // Scroll al final después de enviar mensaje
+      setTimeout(() => {
+        if (messageContainer) {
+          messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+      }, 50);
     });
 
     escucharMensajes();
+
+    // Inicializar altura en carga
+    adjustViewportHeight();
   </script>
 </body>
 </html>

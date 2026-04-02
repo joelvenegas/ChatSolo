@@ -48,6 +48,37 @@
     
     const form = document.getElementById("loginForm");
     const loginBtn = document.getElementById("loginBtn");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const loginContainer = document.querySelector(".login-container");
+
+    // Manejo del teclado virtual en móviles
+    function adjustViewportHeight() {
+      const viewportHeight = window.visualViewport?.height || window.innerHeight;
+      if (loginContainer) {
+        loginContainer.style.minHeight = viewportHeight + "px";
+      }
+    }
+
+    // Event listeners para cambios de viewport
+    window.addEventListener("resize", adjustViewportHeight);
+    window.addEventListener("orientationchange", () => {
+      setTimeout(adjustViewportHeight, 100);
+    });
+
+    // Manejar cuando los inputs reciben focus
+    [emailInput, passwordInput].forEach(input => {
+      input.addEventListener("focus", () => {
+        setTimeout(() => {
+          input.scrollIntoView({ behavior: "smooth", block: "center" });
+          adjustViewportHeight();
+        }, 300);
+      });
+
+      input.addEventListener("blur", () => {
+        setTimeout(adjustViewportHeight, 100);
+      });
+    });
     
     form.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -56,6 +87,9 @@
         loginBtn.disabled = false;
       });
     });
+
+    // Inicializar altura en carga
+    adjustViewportHeight();
   </script>
 </body>
 </html>

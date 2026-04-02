@@ -26,17 +26,21 @@ body {
   background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-bg-secondary) 50%, var(--color-bg-tertiary) 100%);
   color: var(--color-text);
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   justify-content: center;
   align-items: center;
   overflow-x: hidden;
+  overflow-y: auto;
 }
 
 /* Mobile First */
 .login-container {
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   padding: 1rem;
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
   display: flex;
   justify-content: center;
   align-items: center;
