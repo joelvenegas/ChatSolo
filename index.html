@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Muro privado</title>
+</head>
+<body>
+
+<h2>Login</h2>
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Contraseña">
+<button onclick="login()">Entrar</button>
+
+<div id="app" style="display:none;">
+  <h2>Nuevo mensaje</h2>
+  <input id="mensaje">
+  <button onclick="guardarMensaje()">Enviar</button>
+
+  <h3>Mensajes:</h3>
+  <ul id="lista"></ul>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAiWQ4215-aB3rldWCikr6ST2khijVOb6g",
+  authDomain: "web-messages-836cc.firebaseapp.com",
+  projectId: "web-messages-836cc",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+window.login = async function () {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  await signInWithEmailAndPassword(auth, email, password);
+
+  document.getElementById("app").style.display = "block";
+  cargarMensajes();
+};
+
+window.guardarMensaje = async function () {
+  const texto = document.getElementById("mensaje").value;
+  await addDoc(collection(db, "mensajes"), { texto });
+  location.reload();
+};
+
+async function cargarMensajes() {
+  const querySnapshot = await getDocs(collection(db, "mensajes"));
+  const lista = document.getElementById("lista");
+
+  lista.innerHTML = "";
+
+  querySnapshot.forEach((doc) => {
+    const li = document.createElement("li");
+    li.textContent = doc.data().texto;
+    lista.appendChild(li);
+  });
+}
+</script>
+
+</body>
+</html>
