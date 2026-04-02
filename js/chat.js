@@ -1,8 +1,6 @@
-import { db, auth, storage } from "./firebase.js";
+import { db, auth } from "./firebase.js";
 import { collection, addDoc, onSnapshot, query, orderBy } 
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-import { ref, uploadBytes, getDownloadURL } 
-from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
 
 const messageContainer = document.getElementById("mensajes");
 
