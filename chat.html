@@ -21,6 +21,20 @@
     <footer class="chat-footer">
       <form id="chatForm" class="chat-input-form">
         <input 
+          id="imageInput"
+          type="file"
+          accept="image/*"
+          style="display: none;"
+          aria-label="Seleccionar imagen"
+        >
+        <button 
+          type="button" 
+          id="cameraBtn" 
+          class="camera-btn" 
+          aria-label="Subir imagen"
+          title="Subir imagen"
+        >📷</button>
+        <input 
           id="mensaje" 
           type="text"
           class="chat-input"
@@ -36,13 +50,15 @@
 
   <script type="module">
     import { checkAuth, logout } from "./js/auth.js";
-    import { enviarMensaje, escucharMensajes } from "./js/chat.js";
+    import { enviarMensaje, escucharMensajes, enviarImagen } from "./js/chat.js";
 
     checkAuth();
 
     const logoutBtn = document.getElementById("logoutBtn");
     const chatForm = document.getElementById("chatForm");
     const sendBtn = document.getElementById("sendBtn");
+    const cameraBtn = document.getElementById("cameraBtn");
+    const imageInput = document.getElementById("imageInput");
     const chatContainer = document.querySelector(".chat-container");
     const chatFooter = document.querySelector(".chat-footer");
     const messageContainer = document.getElementById("mensajes");
@@ -91,6 +107,32 @@
         chatFooter.scrollIntoView({ behavior: "smooth", block: "end" });
         adjustViewportHeight();
       }, 300);
+    });
+
+    // Botón de cámara para subir imágenes
+    cameraBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      imageInput.click();
+    });
+
+    imageInput.addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        cameraBtn.disabled = true;
+        cameraBtn.textContent = "⏳";
+        
+        try {
+          await enviarImagen(file);
+          messageContainer.scrollTop = messageContainer.scrollHeight;
+        } catch (err) {
+          console.error("Error al subir imagen:", err);
+          alert("Error al subir la imagen");
+        } finally {
+          cameraBtn.disabled = false;
+          cameraBtn.textContent = "📷";
+          imageInput.value = "";
+        }
+      }
     });
 
     logoutBtn.addEventListener("click", async () => {
