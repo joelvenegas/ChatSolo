@@ -151,6 +151,9 @@ body {
   background: var(--color-surface);
   backdrop-filter: blur(10px);
   padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  min-height: fit-content;
+  position: relative;
+  z-index: 100;
 }
 
 .chat-input-form {

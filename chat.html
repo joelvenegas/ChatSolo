@@ -44,6 +44,7 @@
     const chatForm = document.getElementById("chatForm");
     const sendBtn = document.getElementById("sendBtn");
     const chatContainer = document.querySelector(".chat-container");
+    const chatFooter = document.querySelector(".chat-footer");
     const messageContainer = document.getElementById("mensajes");
     const messageInput = document.getElementById("mensaje");
 
@@ -53,6 +54,12 @@
       if (chatContainer) {
         chatContainer.style.height = viewportHeight + "px";
       }
+      // Asegurar que el footer y mensajes se ajusten
+      setTimeout(() => {
+        if (messageContainer) {
+          messageContainer.scrollTop = messageContainer.scrollHeight;
+        }
+      }, 50);
     }
 
     // Event listeners para cambios de viewport
@@ -61,10 +68,25 @@
       setTimeout(adjustViewportHeight, 100);
     });
 
+    // Detectar cuando el teclado aparece
+    let lastInnerHeight = window.innerHeight;
+    window.addEventListener("resize", () => {
+      const currentInnerHeight = window.innerHeight;
+      if (currentInnerHeight < lastInnerHeight) {
+        // Teclado abierto
+        setTimeout(() => {
+          messageInput.scrollIntoView({ behavior: "smooth", block: "end" });
+          chatFooter.scrollIntoView({ behavior: "smooth", block: "end" });
+        }, 100);
+      }
+      lastInnerHeight = currentInnerHeight;
+    });
+
     // Manejar cuando el input recibe focus
     messageInput.addEventListener("focus", () => {
       setTimeout(() => {
         messageInput.scrollIntoView({ behavior: "smooth", block: "end" });
+        chatFooter.scrollIntoView({ behavior: "smooth", block: "end" });
         adjustViewportHeight();
       }, 300);
     });
@@ -101,6 +123,7 @@
         if (messageContainer) {
           messageContainer.scrollTop = messageContainer.scrollHeight;
         }
+        chatFooter.scrollIntoView({ behavior: "smooth", block: "end" });
       }, 50);
     });
 

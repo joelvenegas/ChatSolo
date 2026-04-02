@@ -54,9 +54,7 @@ export function escucharMensajes() {
           div.innerHTML = `<div>${escapeHtml(data.texto)}</div><small style="opacity: 0.7; font-size: 0.75em;">${timeString}</small>`;
         } else {
           div.classList.add("other");
-          div.innerHTML = `<strong>${escapeHtml(userName)}:</strong> ${escapeHtml(
-            data.texto
-          )}<br><small style="opacity: 0.7; font-size: 0.75em;">${timeString}</small>`;
+          div.innerHTML = `<div>${escapeHtml(data.texto)}</div><small style="opacity: 0.7; font-size: 0.75em;">${timeString}</small>`;
         }
 
         messageContainer.appendChild(div);
