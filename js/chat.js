@@ -46,7 +46,6 @@ export function escucharMensajes() {
           minute: "2-digit"
         });
 
-        const userName = data.user.split("@")[0];
         const isCurrentUser = data.user === auth.currentUser?.email;
 
         if (isCurrentUser) {
@@ -61,7 +60,9 @@ export function escucharMensajes() {
       });
 
       // Auto scroll to latest message
-      messageContainer.scrollTop = messageContainer.scrollHeight;
+      requestAnimationFrame(() => {
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+      });
     },
     (err) => {
       console.error("Error escuchando mensajes:", err);

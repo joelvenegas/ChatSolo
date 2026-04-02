@@ -50,6 +50,7 @@
     const loginBtn = document.getElementById("loginBtn");
     const emailInput = document.getElementById("email");
     const passwordInput = document.getElementById("password");
+    const errorEl = document.getElementById("error");
     const loginContainer = document.querySelector(".login-container");
 
     // Manejo del teclado virtual en móviles
@@ -59,6 +60,16 @@
         loginContainer.style.minHeight = viewportHeight + "px";
       }
     }
+
+    // Limpiar error cuando el usuario escribe
+    [emailInput, passwordInput].forEach(input => {
+      input.addEventListener("input", () => {
+        if (errorEl && errorEl.classList.contains("show")) {
+          errorEl.classList.remove("show");
+          errorEl.textContent = "";
+        }
+      });
+    });
 
     // Event listeners para cambios de viewport
     window.addEventListener("resize", adjustViewportHeight);

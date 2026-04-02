@@ -54,32 +54,19 @@
       if (chatContainer) {
         chatContainer.style.height = viewportHeight + "px";
       }
-      // Asegurar que el footer y mensajes se ajusten
-      setTimeout(() => {
-        if (messageContainer) {
-          messageContainer.scrollTop = messageContainer.scrollHeight;
-        }
-      }, 50);
     }
 
-    // Event listeners para cambios de viewport
-    window.addEventListener("resize", adjustViewportHeight);
-    window.addEventListener("orientationchange", () => {
-      setTimeout(adjustViewportHeight, 100);
+    // Event listener para cambios de viewport
+    let resizeTimeout;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        adjustViewportHeight();
+      }, 100);
     });
 
-    // Detectar cuando el teclado aparece
-    let lastInnerHeight = window.innerHeight;
-    window.addEventListener("resize", () => {
-      const currentInnerHeight = window.innerHeight;
-      if (currentInnerHeight < lastInnerHeight) {
-        // Teclado abierto
-        setTimeout(() => {
-          messageInput.scrollIntoView({ behavior: "smooth", block: "end" });
-          chatFooter.scrollIntoView({ behavior: "smooth", block: "end" });
-        }, 100);
-      }
-      lastInnerHeight = currentInnerHeight;
+    window.addEventListener("orientationchange", () => {
+      setTimeout(adjustViewportHeight, 100);
     });
 
     // Manejar cuando el input recibe focus
@@ -107,13 +94,6 @@
       await enviarMensaje();
       sendBtn.disabled = false;
       messageInput.focus();
-      // Scroll al final después de enviar mensaje
-      setTimeout(() => {
-        if (messageContainer) {
-          messageContainer.scrollTop = messageContainer.scrollHeight;
-        }
-        chatFooter.scrollIntoView({ behavior: "smooth", block: "end" });
-      }, 50);
     });
 
     escucharMensajes();
