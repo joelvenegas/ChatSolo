@@ -1,24 +1,40 @@
 * {
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
   margin: 0;
   height: 100vh;
-  background: #0f172a;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
   display: flex;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
 
 /* Contenedor */
 .login-box {
-  width: 320px;
+  width: 100%;
+  max-width: 400px;
   padding: 40px;
-  background: #111827;
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0,255,255,0.2);
+  background: rgba(17, 24, 39, 0.95);
+  border-radius: 15px;
+  box-shadow: 0 15px 35px rgba(0, 255, 255, 0.3), 0 5px 15px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Título */
@@ -26,66 +42,147 @@ body {
   margin: 0 0 30px;
   color: #fff;
   text-align: center;
+  font-size: 28px;
+  font-weight: 300;
+  letter-spacing: 2px;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
 }
 
 /* Inputs */
 .user-box {
   position: relative;
+  margin-bottom: 40px;
 }
 
 .user-box input {
   width: 100%;
-  padding: 10px 0;
-  font-size: 16px;
+  padding: 15px 0 10px;
+  font-size: 18px;
   color: #fff;
-  margin-bottom: 30px;
   border: none;
-  border-bottom: 1px solid #00ffff;
+  border-bottom: 2px solid #00ffff;
   outline: none;
   background: transparent;
+  transition: all 0.3s ease;
+}
+
+.user-box input:focus {
+  border-bottom-color: #00ffff;
+  box-shadow: 0 1px 0 0 #00ffff;
 }
 
 .user-box label {
   position: absolute;
-  top: 0;
+  top: 15px;
   left: 0;
-  padding: 10px 0;
   color: #aaa;
-  font-size: 14px;
+  font-size: 16px;
   pointer-events: none;
-  transition: 0.3s;
+  transition: all 0.3s ease;
 }
 
 /* Animación label */
 .user-box input:focus ~ label,
 .user-box input:valid ~ label {
-  top: -20px;
+  top: -10px;
   color: #00ffff;
   font-size: 12px;
+  font-weight: 500;
 }
 
 /* Botón */
 button {
   width: 100%;
-  background: transparent;
-  border: 1px solid #00ffff;
-  color: #00ffff;
-  padding: 10px;
-  border-radius: 5px;
+  background: linear-gradient(45deg, #00ffff, #0080ff);
+  border: none;
+  color: #111;
+  padding: 15px;
+  border-radius: 25px;
   cursor: pointer;
-  transition: 0.3s;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 255, 255, 0.4);
 }
 
 button:hover {
-  background: #00ffff;
-  color: #111;
-  box-shadow: 0 0 10px #00ffff;
+  background: linear-gradient(45deg, #0080ff, #00ffff);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 255, 255, 0.6);
+}
+
+button:active {
+  transform: translateY(0);
 }
 
 /* Error */
 #error {
   color: #ff4d4d;
   text-align: center;
-  margin-top: 10px;
+  margin-top: 20px;
   font-size: 14px;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+#error.show {
+  opacity: 1;
+}
+
+/* Responsiveness */
+@media (max-width: 768px) {
+  .login-box {
+    width: 90%;
+    padding: 30px 20px;
+    margin: 20px;
+  }
+
+  .login-box h2 {
+    font-size: 24px;
+  }
+
+  .user-box input {
+    font-size: 16px;
+    padding: 12px 0 8px;
+  }
+
+  .user-box label {
+    font-size: 14px;
+  }
+
+  button {
+    padding: 12px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-box {
+    width: 95%;
+    padding: 30px 20px;
+  }
+
+  .login-box h2 {
+    font-size: 22px;
+    margin-bottom: 25px;
+  }
+
+  .user-box {
+    margin-bottom: 35px;
+  }
+
+  .user-box input {
+    font-size: 16px;
+    padding: 15px 0 10px;
+  }
+
+  .user-box label {
+    font-size: 14px;
+  }
+
+  button {
+    padding: 12px;
+    font-size: 14px;
+  }
 }

@@ -31,13 +31,15 @@ export function escucharMensajes() {
       const div = document.createElement("div");
       div.classList.add("message");
 
+      const timeString = new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
       if (data.user === auth.currentUser.email) {
         div.classList.add("me");
+        div.innerHTML = `${data.texto}<br><small style="color: rgba(0,0,0,0.7);">${timeString}</small>`;
       } else {
         div.classList.add("other");
+        div.innerHTML = `<strong style="color: #00ffff;">${data.user.split('@')[0]}:</strong> ${data.texto}<br><small style="color: #aaa;">${timeString}</small>`;
       }
-
-      div.innerText = data.texto;
 
       contenedor.appendChild(div);
     });

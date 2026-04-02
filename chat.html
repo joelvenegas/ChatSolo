@@ -38,7 +38,7 @@ document.getElementById("logoutBtn").onclick = logout;
 document.getElementById("sendBtn").onclick = enviarMensaje;
 
 // Enter para enviar
-document.getElementById("mensaje").addEventListener("keypress", (e) => {
+document.getElementById("mensaje").addEventListener("keydown", (e) => {
   if (e.key === "Enter") enviarMensaje();
 });
 

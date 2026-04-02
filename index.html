@@ -32,6 +32,19 @@
 import { login } from "./js/auth.js";
 
 document.getElementById("loginBtn").onclick = login;
+
+// Add Enter key functionality
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+
+function handleEnter(event) {
+  if (event.key === 'Enter') {
+    login();
+  }
+}
+
+emailInput.addEventListener('keydown', handleEnter);
+passwordInput.addEventListener('keydown', handleEnter);
 </script>
 
 </body>
