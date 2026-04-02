@@ -96,17 +96,6 @@
       setTimeout(adjustViewportHeight, 100);
     });
 
-    // Scroll automático al último mensaje cuando se reciben nuevos
-    const originalEscucharMensajes = escucharMensajes;
-    escucharMensajes = function() {
-      originalEscucharMensajes();
-      setTimeout(() => {
-        if (messageContainer) {
-          messageContainer.scrollTop = messageContainer.scrollHeight;
-        }
-      }, 100);
-    };
-
     logoutBtn.addEventListener("click", async () => {
       logoutBtn.disabled = true;
       await logout();
