@@ -126,7 +126,9 @@
           messageContainer.scrollTop = messageContainer.scrollHeight;
         } catch (err) {
           console.error("Error al subir imagen:", err);
-          alert("Error al subir la imagen");
+          // Mostrar mensaje de error específico
+          const errorMsg = err.message || "Error al subir la imagen";
+          alert(errorMsg);
         } finally {
           cameraBtn.disabled = false;
           cameraBtn.textContent = "📷";

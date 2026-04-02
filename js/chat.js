@@ -28,35 +28,123 @@ export async function enviarMensaje() {
 }
 
 export async function enviarImagen(file) {
-  if (!file || !file.type.startsWith("image/")) {
-    throw new Error("El archivo debe ser una imagen");
+  // Validar que sea archivo
+  if (!file) {
+    throw new Error("No se seleccionó ningún archivo");
   }
 
-  // Limitar tamaño a 1MB para base64
-  if (file.size > 1 * 1024 * 1024) {
-    throw new Error("La imagen debe ser menor a 1MB");
+  // Validar tipo de archivo
+  if (!file.type.startsWith("image/")) {
+    throw new Error("El archivo debe ser una imagen (JPG, PNG, GIF, etc)");
+  }
+
+  // Comprimir imagen si es muy grande
+  let fileToUse = file;
+  const maxSize = 1 * 1024 * 1024;
+  
+  if (file.size > maxSize) {
+    try {
+      fileToUse = await comprimirImagen(file);
+      if (fileToUse.size > maxSize) {
+        throw new Error(`La imagen es muy grande (${(file.size / 1024 / 1024).toFixed(2)}MB). Máximo 1MB`);
+      }
+    } catch (err) {
+      throw new Error(`Error al comprimir: ${err.message}`);
+    }
   }
 
   return new Promise((resolve, reject) => {
+    try {
+      const reader = new FileReader();
+
+      reader.onload = async () => {
+        try {
+          // Validar que se haya leído correctamente
+          if (!reader.result) {
+            throw new Error("No se pudo leer la imagen");
+          }
+
+          const base64Image = reader.result;
+
+          // Validar que el base64 no esté vacío
+          if (base64Image.length < 100) {
+            throw new Error("La imagen está vacía o es muy pequeña");
+          }
+
+          // Guardar mensaje con imagen en base64
+          await addDoc(collection(db, "mensajes"), {
+            texto: "",
+            imageData: base64Image,
+            user: auth.currentUser.email,
+            timestamp: Date.now(),
+            type: "image"
+          });
+
+          resolve();
+        } catch (err) {
+          reject(err);
+        }
+      };
+
+      reader.onerror = (error) => {
+        console.error("FileReader error:", error);
+        reject(new Error(`Error al leer el archivo: ${error.type || "Desconocido"}`));
+      };
+
+      reader.onabort = () => {
+        reject(new Error("La lectura del archivo fue cancelada"));
+      };
+
+      // Leer el archivo como data URL
+      reader.readAsDataURL(fileToUse);
+    } catch (error) {
+      reject(new Error(`Error al procesar la imagen: ${error.message}`));
+    }
+  });
+}
+
+// Función auxiliar para comprimir imágenes
+function comprimirImagen(file) {
+  return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
-    reader.onload = async () => {
-      try {
-        const base64Image = reader.result;
+    reader.onload = (event) => {
+      const img = new Image();
 
-        // Guardar mensaje con imagen en base64
-        await addDoc(collection(db, "mensajes"), {
-          texto: "",
-          imageData: base64Image,
-          user: auth.currentUser.email,
-          timestamp: Date.now(),
-          type: "image"
-        });
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
 
-        resolve();
-      } catch (err) {
-        reject(err);
-      }
+        // Reducir tamaño si es muy grande
+        const maxDimension = 1024;
+        if (width > maxDimension || height > maxDimension) {
+          const ratio = Math.min(maxDimension / width, maxDimension / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convertir canvas a blob con compresión
+        canvas.toBlob(
+          (blob) => {
+            resolve(blob);
+          },
+          "image/jpeg",
+          0.7 // Calidad: 70%
+        );
+      };
+
+      img.onerror = () => {
+        reject(new Error("No se pudo procesar la imagen"));
+      };
+
+      img.src = event.target.result;
     };
 
     reader.onerror = () => {
