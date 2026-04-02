@@ -1,25 +1,48 @@
-import { db } from "./firebase.js";
-import { collection, addDoc, getDocs } 
+import { db, auth } from "./firebase.js";
+import { collection, addDoc, onSnapshot, query, orderBy } 
 from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 export async function enviarMensaje() {
-  const texto = document.getElementById("mensaje").value;
+  const input = document.getElementById("mensaje");
+  const texto = input.value;
 
-  await addDoc(collection(db, "mensajes"), { texto });
+  if (!texto.trim()) return;
 
-  document.getElementById("mensaje").value = "";
-  cargarMensajes();
+  await addDoc(collection(db, "mensajes"), {
+    texto,
+    user: auth.currentUser.email,
+    timestamp: Date.now()
+  });
+
+  input.value = "";
 }
 
-export async function cargarMensajes() {
-  const lista = document.getElementById("lista");
-  lista.innerHTML = "";
+export function escucharMensajes() {
+  const contenedor = document.getElementById("mensajes");
 
-  const querySnapshot = await getDocs(collection(db, "mensajes"));
+  const q = query(collection(db, "mensajes"), orderBy("timestamp"));
 
-  querySnapshot.forEach((doc) => {
-    const li = document.createElement("li");
-    li.textContent = doc.data().texto;
-    lista.appendChild(li);
+  onSnapshot(q, (snapshot) => {
+    contenedor.innerHTML = "";
+
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+
+      const div = document.createElement("div");
+      div.classList.add("message");
+
+      if (data.user === auth.currentUser.email) {
+        div.classList.add("me");
+      } else {
+        div.classList.add("other");
+      }
+
+      div.innerText = data.texto;
+
+      contenedor.appendChild(div);
+    });
+
+    // Auto scroll
+    contenedor.scrollTop = contenedor.scrollHeight;
   });
 }

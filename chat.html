@@ -1,33 +1,48 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <link rel="stylesheet" href="css/styles.css">
-  <title>Chat</title>
+<meta charset="UTF-8">
+<title>Chat</title>
+
+<link rel="stylesheet" href="css/chat.css">
+
 </head>
 <body>
 
-<div class="container">
-  <h2>💬 Chat</h2>
+<div class="chat-container">
 
-  <button id="logoutBtn">Cerrar sesión</button>
+  <!-- Header -->
+  <div class="chat-header">
+    <h2>💬 Chat</h2>
+    <button id="logoutBtn">Salir</button>
+  </div>
 
-  <input id="mensaje" placeholder="Escribí algo">
-  <button id="sendBtn">Enviar</button>
+  <!-- Mensajes -->
+  <div id="mensajes" class="chat-messages"></div>
 
-  <ul id="lista"></ul>
+  <!-- Input -->
+  <div class="chat-input">
+    <input id="mensaje" placeholder="Escribí un mensaje...">
+    <button id="sendBtn">➤</button>
+  </div>
+
 </div>
 
 <script type="module">
 import { checkAuth, logout } from "./js/auth.js";
-import { enviarMensaje, cargarMensajes } from "./js/chat.js";
+import { enviarMensaje, escucharMensajes } from "./js/chat.js";
 
 checkAuth();
 
 document.getElementById("logoutBtn").onclick = logout;
 document.getElementById("sendBtn").onclick = enviarMensaje;
 
-cargarMensajes();
+// Enter para enviar
+document.getElementById("mensaje").addEventListener("keypress", (e) => {
+  if (e.key === "Enter") enviarMensaje();
+});
+
+escucharMensajes();
 </script>
 
 </body>

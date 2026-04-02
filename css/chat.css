@@ -1,0 +1,92 @@
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #0f172a;
+  color: white;
+}
+
+/* Contenedor */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Header */
+.chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: #111827;
+  border-bottom: 1px solid #00ffff33;
+}
+
+.chat-header button {
+  background: transparent;
+  border: 1px solid #00ffff;
+  color: #00ffff;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+/* Mensajes */
+.chat-messages {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* Burbuja */
+.message {
+  max-width: 60%;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  word-wrap: break-word;
+}
+
+/* Mensaje propio */
+.me {
+  background: #00ffff22;
+  border: 1px solid #00ffff;
+  margin-left: auto;
+  text-align: right;
+}
+
+/* Mensaje de otros */
+.other {
+  background: #1f2937;
+  border: 1px solid #333;
+}
+
+/* Input */
+.chat-input {
+  display: flex;
+  padding: 10px;
+  background: #111827;
+  border-top: 1px solid #00ffff33;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px;
+  background: transparent;
+  border: 1px solid #00ffff;
+  color: white;
+  outline: none;
+}
+
+.chat-input button {
+  margin-left: 10px;
+  padding: 10px 15px;
+  background: transparent;
+  border: 1px solid #00ffff;
+  color: #00ffff;
+  cursor: pointer;
+}
+
+.chat-input button:hover {
+  background: #00ffff;
+  color: #111;
+}
