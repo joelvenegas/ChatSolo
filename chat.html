@@ -1,49 +1,63 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Chat</title>
-
-<link rel="stylesheet" href="css/chat.css">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Chat - ChatSolo</title>
+  <link rel="stylesheet" href="css/chat.css">
 </head>
 <body>
+  <div class="chat-container">
+    <!-- Header -->
+    <header class="chat-header">
+      <h1>💬 ChatSolo</h1>
+      <button id="logoutBtn" class="logout-btn" aria-label="Cerrar sesión">Salir</button>
+    </header>
 
-<div class="chat-container">
+    <!-- Mensajes -->
+    <div id="mensajes" class="chat-messages" role="log" aria-live="polite" aria-label="Mensajes del chat"></div>
 
-  <!-- Header -->
-  <div class="chat-header">
-    <h2>💬 Chat</h2>
-    <button id="logoutBtn">Salir</button>
+    <!-- Input -->
+    <footer class="chat-footer">
+      <form id="chatForm" class="chat-input-form">
+        <input 
+          id="mensaje" 
+          type="text"
+          class="chat-input"
+          placeholder="Escribe un mensaje..."
+          autocomplete="off"
+          aria-label="Campo para escribir mensaje"
+          required
+        >
+        <button type="submit" id="sendBtn" class="send-btn" aria-label="Enviar mensaje">➤</button>
+      </form>
+    </footer>
   </div>
 
-  <!-- Mensajes -->
-  <div id="mensajes" class="chat-messages"></div>
+  <script type="module">
+    import { checkAuth, logout } from "./js/auth.js";
+    import { enviarMensaje, escucharMensajes } from "./js/chat.js";
 
-  <!-- Input -->
-  <div class="chat-input">
-    <input id="mensaje" placeholder="Escribí un mensaje...">
-    <button id="sendBtn">➤</button>
-  </div>
+    checkAuth();
 
-</div>
+    const logoutBtn = document.getElementById("logoutBtn");
+    const chatForm = document.getElementById("chatForm");
+    const sendBtn = document.getElementById("sendBtn");
 
-<script type="module">
-import { checkAuth, logout } from "./js/auth.js";
-import { enviarMensaje, escucharMensajes } from "./js/chat.js";
+    logoutBtn.addEventListener("click", async () => {
+      logoutBtn.disabled = true;
+      await logout();
+    });
 
-checkAuth();
+    chatForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      sendBtn.disabled = true;
+      await enviarMensaje();
+      sendBtn.disabled = false;
+      document.getElementById("mensaje").focus();
+    });
 
-document.getElementById("logoutBtn").onclick = logout;
-document.getElementById("sendBtn").onclick = enviarMensaje;
-
-// Enter para enviar
-document.getElementById("mensaje").addEventListener("keydown", (e) => {
-  if (e.key === "Enter") enviarMensaje();
-});
-
-escucharMensajes();
-</script>
-
+    escucharMensajes();
+  </script>
 </body>
 </html>

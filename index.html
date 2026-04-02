@@ -1,51 +1,61 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Login</title>
-
-<link rel="stylesheet" href="css/login.css">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Login - ChatSolo</title>
+  <link rel="stylesheet" href="css/login.css">
 </head>
 
 <body>
+  <div class="login-container">
+    <div class="login-box">
+      <h1>ChatSolo</h1>
+      
+      <form id="loginForm" class="login-form">
+        <div class="user-box">
+          <input 
+            id="email" 
+            type="email" 
+            placeholder=" "
+            required
+            autocomplete="email"
+            inputmode="email"
+          >
+          <label for="email">Email</label>
+        </div>
 
-<div class="login-box">
-  <h2>Login</h2>
+        <div class="user-box">
+          <input 
+            id="password" 
+            type="password" 
+            placeholder=" "
+            required
+            autocomplete="current-password"
+          >
+          <label for="password">Contraseña</label>
+        </div>
 
-  <div class="user-box">
-    <input id="email" type="text" required>
-    <label>Email</label>
+        <button type="submit" id="loginBtn" class="login-btn">Ingresar</button>
+      </form>
+
+      <div id="error" class="error-message" role="alert" aria-live="polite"></div>
+    </div>
   </div>
 
-  <div class="user-box">
-    <input id="password" type="password" required>
-    <label>Contraseña</label>
-  </div>
-
-  <button id="loginBtn">Ingresar</button>
-
-  <div id="error"></div>
-</div>
-
-<script type="module">
-import { login } from "./js/auth.js";
-
-document.getElementById("loginBtn").onclick = login;
-
-// Add Enter key functionality
-const emailInput = document.getElementById("email");
-const passwordInput = document.getElementById("password");
-
-function handleEnter(event) {
-  if (event.key === 'Enter') {
-    login();
-  }
-}
-
-emailInput.addEventListener('keydown', handleEnter);
-passwordInput.addEventListener('keydown', handleEnter);
-</script>
-
+  <script type="module">
+    import { login } from "./js/auth.js";
+    
+    const form = document.getElementById("loginForm");
+    const loginBtn = document.getElementById("loginBtn");
+    
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      loginBtn.disabled = true;
+      login().finally(() => {
+        loginBtn.disabled = false;
+      });
+    });
+  </script>
 </body>
 </html>
