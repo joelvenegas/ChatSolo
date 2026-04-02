@@ -56,17 +56,32 @@
       }
     }
 
-    // Event listener para cambios de viewport
-    let resizeTimeout;
-    window.addEventListener("resize", () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
+    // Detectar cambios en visualViewport directamente (más confiable para teclado)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", () => {
         adjustViewportHeight();
-      }, 100);
+      });
+      
+      window.visualViewport.addEventListener("scroll", () => {
+        adjustViewportHeight();
+      });
+    }
+
+    // Fallback para navegadores sin visualViewport
+    window.addEventListener("resize", () => {
+      adjustViewportHeight();
     });
 
     window.addEventListener("orientationchange", () => {
       setTimeout(adjustViewportHeight, 100);
+    });
+
+    // Manejar cuando el input pierde focus - restaurar altura
+    messageInput.addEventListener("blur", () => {
+      setTimeout(() => {
+        adjustViewportHeight();
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+      }, 100);
     });
 
     // Manejar cuando el input recibe focus
@@ -76,11 +91,6 @@
         chatFooter.scrollIntoView({ behavior: "smooth", block: "end" });
         adjustViewportHeight();
       }, 300);
-    });
-
-    // Manejar cuando el input pierde focus
-    messageInput.addEventListener("blur", () => {
-      setTimeout(adjustViewportHeight, 100);
     });
 
     logoutBtn.addEventListener("click", async () => {
